@@ -5,57 +5,54 @@
 #include <pthread.h>
 #include <fcntl.h>
 
+#include "hash/reverse.h"
+
+#include "linkedList.h"
 #include "buffer.h"
 #include "files.h"
+#include "filesLocations.h"
+#include "constants.h"
 
 //https://www.gnu.org/software/libc/manual/html_node/Example-of-Getopt.html#Example-of-Getopt
 
-#define VOWEL 0
-#define CONSONANT 1
 
 pthread_mutex_t mtxPrt;
+int SELECTION = VOWEL;
 
-typedef struct{
-    char **paths;
-    int amount;
-}FilesList;
-
-int parseFiles(FilesList *files)
+void log(const char* one,const char* two)
 {
-    char *buffer = malloc(32);
-    if(!buffer){
-        printf("Error malloc");
-        return -1;
-    }
-    for(int i=0;i<files->amount;i++)
-    {
-        pthread_mutex_lock(&mtxPrt);
-        printf("Parsing : %s\n",files->paths[i]);
-        pthread_mutex_unlock(&mtxPrt);
-
-        char *filename = files->paths[i];
-        int f = open(filename, O_RDONLY);
-        if(f>-1)
-        {
-            for(int k=0;get32Bytes(buffer, f, k*HASH_SIZE)>0;k++)
-                insertInBuffer(buffer);
-            if(close(f)==-1)
-                printf("Unable to close a file");
-        }
-    }
-    free(buffer);
-    return 0;
+    pthread_mutex_lock(&mtxPrt);
+    printf("%s : %s\n",one,two);
+    pthread_mutex_unlock(&mtxPrt);
 }
-int crackHashes()
-{
 
+void crackHashes()
+{
+    uint8_t *hash;
+    char res[MAX_SIZE_PSWD + 1];
+    while(1){
+        if(isAllLocationsDone() && isBufferEmpty())//si plus de hash a cracker
+            break;
+        hash = removeFromBuffer();
+
+        sprintf(res,"");
+        int succes = reversehash(hash, res, MAX_SIZE_PSWD);
+
+        if(succes){
+            addIfGood(res, SELECTION);
+            //log("ReverseHash has found",res);
+        }
+        else
+            log("ReverseHash didn't find a password that matches the hash...",res);
+    }
 }
 
 int main(int argc, char *argv[])
 {
+    pthread_mutex_init(&mtxPrt, NULL);
     printf("Hello world!\n");
 
-    int NTHREADS = 1, SELECTION = VOWEL;
+    int NTHREADS = 1;
     char *OUT_FILE = NULL;
     char **IN_FILES = NULL;
     int N_IN_FILES = 1;
@@ -83,61 +80,55 @@ int main(int argc, char *argv[])
     for(int i=optind;i<argc;i++)
         IN_FILES[i-optind] = argv[i];
 
+    N_IN_FILES = 1;
+    IN_FILES = malloc(N_IN_FILES * sizeof(char*));
+    char *in = "test.bin";
+    IN_FILES[0] = in;
+    char *out = "outy.txt";
+    OUT_FILE = out;
+    NTHREADS = 6;
+
     ///PRINT-------------------------------------
     printf("NTHREADS : %d\n",NTHREADS);
     for(int i=0;i<N_IN_FILES;i++)
         printf("IN FILE n_%d : %s\n",i+1,IN_FILES[i]);
     printf("OUT FILE : %s\n",OUT_FILE);
+    if(SELECTION == VOWEL)
+        printf("SELECTION : VOWEL\n");
+    else
+        printf("SELECTION : CONSONANT\n");
+
     ///------------------------------------------
 
-    /*int f = open(filename, O_RDONLY);
-    if(f>-1)
+    initBuffer(NTHREADS*2);
+    int err = initLocations(IN_FILES, N_IN_FILES);
+    if(err)
+        return err;
+    initList();
+
+    pthread_t thrdCalcul[NTHREADS];
+    for(int i=0;i<NTHREADS;i++)
     {
-        struct stat * buf = malloc(sizeof(struct stat));
-        if(fstat(f,buf)==-1)
-            return -1;
-        if(buf->st_size<index)
-            return -2;
-        if(lseek(f,index*sizeof(int),SEEK_SET)==-1)
-            return -1;
-        int b;
-        if(read(f,&b,sizeof(int))==-1)
-            return -1;
-        if(close(f)==-1)
-            return -1;
-        return b;
-    }
-    return -1;*/
-
-    pthread_mutex_init(&mtxPrt, NULL);
-
-
-    const int N_LOCATIONS = 1;
-    pthread_t thrdFiles[N_LOCATIONS];
-
-    FilesList filesList;
-    filesList.paths = IN_FILES;
-    filesList.amount = N_IN_FILES;
-
-    for(int i=0;i<N_LOCATIONS;i++)
-    {
-        int err = pthread_create(&thrdFiles[i], NULL, (void*)&parseFiles, (void*)&filesList);
-        // Check if thread is created sucessfuly
-        if (err)
+        int err = pthread_create(&thrdCalcul[i], NULL, (void*)&crackHashes, NULL);
+        if(err)
         {
-            printf("Thread creation failed : %s",strerror(err));
+            log("Thread creation failed",strerror(err));
             return err;
         }
-        else{
-            pthread_mutex_lock(&mtxPrt);
-            printf("Thread Created with ID : %d\n", thrdFiles[i]);
-            pthread_mutex_unlock(&mtxPrt);
-        }
     }
+    for(int i=0;i<NTHREADS;i++)
+        pthread_join(thrdCalcul[i],NULL);
 
-    pthread_join(thrdFiles[0],NULL);
+    err = writeList(OUT_FILE);
+    if(err)
+        return err;
+
+    freeList();
+    freeLocations();
+    freeBuffer();
 
     free(IN_FILES);
+
     return 0;
 }
 

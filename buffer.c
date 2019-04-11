@@ -5,14 +5,18 @@
 
 #include "buffer.h"
 
-char **buffer;
+size_t BUFFER_SIZE;
+uint8_t **buffer;
 pthread_mutex_t mutex;
 sem_t empty;
 sem_t full;
 
-void initBuffer()
+void initBuffer(const size_t size)
 {
-    buffer = malloc(BUFFER_SIZE * sizeof(char*));
+    BUFFER_SIZE = size;
+    buffer = malloc(BUFFER_SIZE * sizeof(uint8_t*));
+    for(int i=0;i<BUFFER_SIZE;i++)
+        buffer[i] = NULL;
 
     pthread_mutex_init(&mutex, NULL);
     sem_init(&empty, 0 , BUFFER_SIZE); // buffer vide
@@ -27,40 +31,58 @@ void freeBuffer()
             free(buffer[i]);
     free(buffer);
 }
-
-void insertInBuffer(char *hash)
+int isBufferEmpty()
+{
+    for(int i=0;i<BUFFER_SIZE;i++)
+        if(buffer[i])
+            return 0;
+    return 1;
+}
+void insertInBuffer(uint8_t *hash)
 {
     sem_wait(&empty); // attente d'un slot libre
     pthread_mutex_lock(&mutex);
-
     // section critique
     for(int i=0;i<BUFFER_SIZE;i++)
-        if(!buffer[i])
+        if(buffer[i] == NULL)
         {
             buffer[i] = malloc(HASH_SIZE);
             memcpy(buffer[i], hash, HASH_SIZE);
+            break;
         }
-
     pthread_mutex_unlock(&mutex);
     sem_post(&full); // il y a un slot rempli en plus
 }
-char *removeFromBuffer()
+uint8_t *removeFromBuffer()
 {
     sem_wait(&full); // attente d'un slot rempli
     pthread_mutex_lock(&mutex);
-
     // section critique
-    char *r = NULL;
+    uint8_t *r = NULL;
     for(int i=0;i<BUFFER_SIZE;i++)
         if(buffer[i])
         {
-            r = malloc(HASH_SIZE);
+            r = (uint8_t*)malloc(HASH_SIZE);
+            if(!r)
+                break;
             memcpy(r, buffer[i], HASH_SIZE);
             free(buffer[i]);
+            buffer[i] = NULL;
             break;
         }
-
     pthread_mutex_unlock(&mutex);
     sem_post(&empty); // il y a un slot libre en plus
     return r;
+}
+
+///Pour débuguer------------------------------------------
+extern pthread_mutex_t mtxPrt;
+void printHash(const char *one,const uint8_t *buff)
+{
+    pthread_mutex_lock(&mtxPrt);
+    printf("%s : ",one);
+    for(int i=0;i<HASH_SIZE;i++)
+        printf("|%x",buff[i]);
+    printf("\n");
+    pthread_mutex_unlock(&mtxPrt);
 }
