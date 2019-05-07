@@ -19,7 +19,11 @@
 pthread_mutex_t mtxPrt;
 int SELECTION = VOWEL;
 
-void log(const char* one,const char* two)
+void errMalloc(const char* error)
+{
+
+}
+void logi(const char* one,const char* two)
 {
     pthread_mutex_lock(&mtxPrt);
     printf("%s : %s\n",one,two);
@@ -40,10 +44,10 @@ void crackHashes()
 
         if(succes){
             addIfGood(res, SELECTION);
-            //log("ReverseHash has found",res);
+            //logi("ReverseHash has found",res);
         }
         else
-            log("ReverseHash didn't find a password that matches the hash...",res);
+            logi("ReverseHash didn't find a password that matches the hash...",res);
     }
 }
 
@@ -53,8 +57,8 @@ int main(int argc, char *argv[])
     printf("Hello world!\n");
 
     int NTHREADS = 1;
-    char *OUT_FILE = NULL;
-    char **IN_FILES = NULL;
+    const char *OUT_FILE = NULL;
+    const char **IN_FILES = NULL;
     int N_IN_FILES = 1;
 
     char c;
@@ -80,13 +84,13 @@ int main(int argc, char *argv[])
     for(int i=optind;i<argc;i++)
         IN_FILES[i-optind] = argv[i];
 
-    N_IN_FILES = 1;
+    /*N_IN_FILES = 1;
     IN_FILES = malloc(N_IN_FILES * sizeof(char*));
     char *in = "test.bin";
     IN_FILES[0] = in;
-    char *out = "outy.txt";
+    char *out = "out.txt";
     OUT_FILE = out;
-    NTHREADS = 6;
+    NTHREADS = 6;*/
 
     ///PRINT-------------------------------------
     printf("NTHREADS : %d\n",NTHREADS);
@@ -112,7 +116,7 @@ int main(int argc, char *argv[])
         int err = pthread_create(&thrdCalcul[i], NULL, (void*)&crackHashes, NULL);
         if(err)
         {
-            log("Thread creation failed",strerror(err));
+            logi("Thread creation failed",strerror(err));
             return err;
         }
     }

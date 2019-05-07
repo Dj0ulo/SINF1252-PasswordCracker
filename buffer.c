@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <pthread.h>
@@ -14,7 +15,8 @@ sem_t full;
 void initBuffer(const size_t size)
 {
     BUFFER_SIZE = size;
-    buffer = malloc(BUFFER_SIZE * sizeof(uint8_t*));
+    buffer = (uint8_t **)malloc(BUFFER_SIZE * sizeof(uint8_t*));
+    if(!buffer)
     for(int i=0;i<BUFFER_SIZE;i++)
         buffer[i] = NULL;
 

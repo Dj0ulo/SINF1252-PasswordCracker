@@ -4,13 +4,15 @@
 #include <pthread.h>
 
 typedef struct{
-    char **paths;
+    const char **paths;
     int amount;
     int done;
     pthread_t thrd;
+    int id;
 }FilesLocation;
 
 int initLocations(const char **, const int);
+void printLocations();
 void freeLocations();
 int isAllLocationsDone();
 
