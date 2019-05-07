@@ -16,9 +16,9 @@ void initBuffer(const size_t size)
 {
     BUFFER_SIZE = size;
     buffer = (uint8_t **)malloc(BUFFER_SIZE * sizeof(uint8_t*));
-    if(!buffer)
-    for(int i=0;i<BUFFER_SIZE;i++)
-        buffer[i] = NULL;
+    if(buffer)
+        for(int i=0;i<BUFFER_SIZE;i++)
+            buffer[i] = NULL;
 
     pthread_mutex_init(&mutex, NULL);
     sem_init(&empty, 0 , BUFFER_SIZE); // buffer vide
@@ -42,6 +42,8 @@ int isBufferEmpty()
 }
 void insertInBuffer(uint8_t *hash)
 {
+    if(!hash)
+        return;
     sem_wait(&empty); // attente d'un slot libre
     pthread_mutex_lock(&mutex);
     // section critique
@@ -64,7 +66,7 @@ uint8_t *removeFromBuffer()
     for(int i=0;i<BUFFER_SIZE;i++)
         if(buffer[i])
         {
-            r = (uint8_t*)malloc(HASH_SIZE);
+            r = malloc(HASH_SIZE);
             if(!r)
                 break;
             memcpy(r, buffer[i], HASH_SIZE);

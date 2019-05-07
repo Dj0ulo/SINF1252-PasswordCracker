@@ -38,16 +38,17 @@ void crackHashes()
         if(isAllLocationsDone() && isBufferEmpty())//si plus de hash a cracker
             break;
         hash = removeFromBuffer();
+        if(hash){
+            sprintf(res,"");
+            int succes = reversehash(hash, res, MAX_SIZE_PSWD);
 
-        sprintf(res,"");
-        int succes = reversehash(hash, res, MAX_SIZE_PSWD);
-
-        if(succes){
-            addIfGood(res, SELECTION);
-            //logi("ReverseHash has found",res);
+            if(succes){
+                addIfGood(res, SELECTION);
+                //logi("ReverseHash has found",res);
+            }
+            else
+                logi("ReverseHash didn't find a password that matches the hash...",res);
         }
-        else
-            logi("ReverseHash didn't find a password that matches the hash...",res);
     }
 }
 
@@ -84,13 +85,13 @@ int main(int argc, char *argv[])
     for(int i=optind;i<argc;i++)
         IN_FILES[i-optind] = argv[i];
 
-    /*N_IN_FILES = 1;
+    N_IN_FILES = 1;
     IN_FILES = malloc(N_IN_FILES * sizeof(char*));
     char *in = "test.bin";
     IN_FILES[0] = in;
-    char *out = "out.txt";
+    char *out = NULL;//"out.txt";
     OUT_FILE = out;
-    NTHREADS = 6;*/
+    NTHREADS = 6;
 
     ///PRINT-------------------------------------
     printf("NTHREADS : %d\n",NTHREADS);
