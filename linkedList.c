@@ -5,6 +5,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
+#include "main.h"
 #include "linkedList.h"
 #include "constants.h"
 
@@ -17,7 +18,12 @@ node_t *initNode(const char *value)
     node_t* n = (node_t*)malloc(sizeof(node_t));
     if(n)
     {
-        n->value = malloc(strlen(value)+1);
+        n->value = (char *)malloc(strlen(value)+1);
+        if(!n->value)
+        {
+            logi("Error malloc","initNode");
+            return NULL;
+        }
         strcpy(n->value, value);
         n->next = NULL;
         return n;
@@ -51,12 +57,14 @@ unsigned int getScore(const char *str, const int selection)
 void initList()
 {
     pthread_mutex_init(&mutexList, NULL);
-    linkedList = malloc(sizeof(list_t));
+    linkedList = (list_t*)malloc(sizeof(list_t));
     if(linkedList)
     {
         linkedList->first = NULL;
         linkedList->size = 0;
     }
+    else
+        logi("Error malloc","initList");
 }
 void eraseList()
 {

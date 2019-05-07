@@ -4,6 +4,7 @@
 #include <pthread.h>
 #include <semaphore.h>
 
+#include "main.h"
 #include "buffer.h"
 
 size_t BUFFER_SIZE;
@@ -19,6 +20,9 @@ void initBuffer(const size_t size)
     if(buffer)
         for(int i=0;i<BUFFER_SIZE;i++)
             buffer[i] = NULL;
+    else
+        logi("Error malloc", "initBuffer");
+
 
     pthread_mutex_init(&mutex, NULL);
     sem_init(&empty, 0 , BUFFER_SIZE); // buffer vide
@@ -50,7 +54,12 @@ void insertInBuffer(uint8_t *hash)
     for(int i=0;i<BUFFER_SIZE;i++)
         if(buffer[i] == NULL)
         {
-            buffer[i] = malloc(HASH_SIZE);
+            buffer[i] = (uint8_t *)malloc(HASH_SIZE);
+            if(!buffer[i])
+            {
+                logi("Error malloc", "insertInBuffer");
+                break;
+            }
             memcpy(buffer[i], hash, HASH_SIZE);
             break;
         }
@@ -66,9 +75,11 @@ uint8_t *removeFromBuffer()
     for(int i=0;i<BUFFER_SIZE;i++)
         if(buffer[i])
         {
-            r = malloc(HASH_SIZE);
-            if(!r)
+            r = (uint8_t *)malloc(HASH_SIZE);
+            if(!r){
+                logi("Error malloc", "removeFromBuffer");
                 break;
+            }
             memcpy(r, buffer[i], HASH_SIZE);
             free(buffer[i]);
             buffer[i] = NULL;

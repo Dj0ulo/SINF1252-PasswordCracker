@@ -44,7 +44,7 @@ void crackHashes()
 
             if(succes){
                 addIfGood(res, SELECTION);
-                //logi("ReverseHash has found",res);
+                logi("ReverseHash has found",res);
             }
             else
                 logi("ReverseHash didn't find a password that matches the hash...",res);
@@ -81,17 +81,22 @@ int main(int argc, char *argv[])
             return 1;
         }
     N_IN_FILES = argc-optind;
-    IN_FILES = malloc(N_IN_FILES * sizeof(char*));
+    IN_FILES = (const char **)malloc(N_IN_FILES * sizeof(char*));
+    if(!IN_FILES)
+    {
+        logi("Error malloc","IN_FILES");
+        return -1;
+    }
     for(int i=optind;i<argc;i++)
         IN_FILES[i-optind] = argv[i];
 
-    N_IN_FILES = 1;
+    /*N_IN_FILES = 1;
     IN_FILES = malloc(N_IN_FILES * sizeof(char*));
     char *in = "test.bin";
     IN_FILES[0] = in;
     char *out = NULL;//"out.txt";
     OUT_FILE = out;
-    NTHREADS = 6;
+    NTHREADS = 6;*/
 
     ///PRINT-------------------------------------
     printf("NTHREADS : %d\n",NTHREADS);

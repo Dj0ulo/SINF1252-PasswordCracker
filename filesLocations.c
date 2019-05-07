@@ -15,9 +15,9 @@ int NLOCATIONS = 1;
 
 int parseFiles(FilesLocation *loc)
 {
-    uint8_t *buffer = malloc(32);
-    if(!buffer){
-        printf("Error malloc buffer");
+    uint8_t *hash = (uint8_t *)malloc(HASH_SIZE);
+    if(!hash){
+        logi("Error malloc","parseFiles");
         return -1;
     }
     for(int i=0;i<loc->amount;i++)
@@ -28,8 +28,8 @@ int parseFiles(FilesLocation *loc)
         int f = open(filename, O_RDONLY);
         if(f>-1)
         {
-            for(int k=0;get32Bytes(buffer, f, k*HASH_SIZE)>0;k++){
-                insertInBuffer(buffer);
+            for(int k=0;get32Bytes(hash, f, k*HASH_SIZE)>0;k++){
+                insertInBuffer(hash);
             }
             if(close(f)==-1)
                 printf("Unable to close a file");
@@ -37,7 +37,7 @@ int parseFiles(FilesLocation *loc)
         else
             logi("Unable to open", loc->paths[i]);
     }
-    free(buffer);
+    free(hash);
     loc->done = 1;
     return 0;
 }
@@ -65,6 +65,11 @@ int initLocations(const char **files, const int amount)
             NLOCATIONS++;
     }
     locFiles = (FilesLocation*)malloc(NLOCATIONS * sizeof(FilesLocation));
+    if(!locFiles){
+        logi("Error malloc","initLocations");
+        return -1;
+    }
+
     for(int i=0;i<NLOCATIONS;i++){
         locFiles[i].id = -2;
         locFiles[i].done = 0;
@@ -90,12 +95,17 @@ int initLocations(const char **files, const int amount)
             if(locFiles[i].id==devicesID[k])
                 locFiles[i].amount++;
         locFiles[i].paths = (const char**)malloc(locFiles[i].amount * sizeof(char*));
-        for(int k=0,j=0;k<amount;k++)
-            if(locFiles[i].id==devicesID[k])
-            {
-                locFiles[i].paths[j]=files[k];
-                j++;
-            }
+        if(locFiles[i].paths)
+            for(int k=0,j=0;k<amount;k++)
+                if(locFiles[i].id==devicesID[k])
+                {
+                    locFiles[i].paths[j]=files[k];
+                    j++;
+                }
+        else{
+            logi("Error malloc","initLocations : paths");
+            return -1;
+        }
     }
     printLocations();
     for(int i=0;i<NLOCATIONS;i++)
