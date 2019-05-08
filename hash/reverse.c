@@ -34,7 +34,7 @@ bool reversehash(const uint8_t *hash, char *res, size_t len)
 {
 	uint8_t hashres[SHA256_DIGEST_SIZE];
 	unsigned int depth;
-	bool found;
+	bool found=0;
 	char tmp[len+1];
 
 	for (depth = 1; depth <= len; depth++) {

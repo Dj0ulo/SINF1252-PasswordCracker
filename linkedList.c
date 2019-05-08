@@ -4,8 +4,9 @@
 #include <pthread.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <unistd.h>
 
-#include "main.h"
+#include "files.h"
 #include "linkedList.h"
 #include "constants.h"
 
@@ -41,7 +42,7 @@ void freeNode(node_t *node)
 unsigned int getScore(const char *str, const int selection)
 {
     int n=0;
-    for(int i=0;i<strlen(str);i++)
+    for(unsigned int i=0;i<strlen(str);i++)
     {
         if(str[i]=='a' || str[i]=='e' || str[i]=='i' || str[i]=='o' || str[i]=='u' || str[i]=='y'){
             if(selection == VOWEL)
@@ -121,7 +122,7 @@ void addIfGood(const char *value, const int selection)
     pthread_mutex_lock(&mutexList);
     if(linkedList)
     {
-        const int n = getScore(value, selection);
+        const unsigned int n = getScore(value, selection);
         if(linkedList->first==NULL)
             addToList(value, n);
         else

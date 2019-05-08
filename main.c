@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <pthread.h>
 #include <fcntl.h>
+#include <getopt.h>
 
 #include "hash/reverse.h"
 
@@ -15,20 +16,9 @@
 
 //https://www.gnu.org/software/libc/manual/html_node/Example-of-Getopt.html#Example-of-Getopt
 
-
-pthread_mutex_t mtxPrt;
+extern pthread_mutex_t mtxPrt;
 int SELECTION = VOWEL;
 
-void errMalloc(const char* error)
-{
-
-}
-void logi(const char* one,const char* two)
-{
-    pthread_mutex_lock(&mtxPrt);
-    printf("%s : %s\n",one,two);
-    pthread_mutex_unlock(&mtxPrt);
-}
 
 void crackHashes()
 {
@@ -39,7 +29,7 @@ void crackHashes()
             break;
         hash = removeFromBuffer();
         if(hash){
-            sprintf(res,"");
+            res[0]=0;
             int succes = reversehash(hash, res, MAX_SIZE_PSWD);
 
             if(succes){
@@ -119,8 +109,8 @@ int main(int argc, char *argv[])
     pthread_t thrdCalcul[NTHREADS];
     for(int i=0;i<NTHREADS;i++)
     {
-        int err = pthread_create(&thrdCalcul[i], NULL, (void*)&crackHashes, NULL);
-        if(err)
+        int errt = pthread_create(&thrdCalcul[i], NULL, (void*)&crackHashes, NULL);
+        if(errt)
         {
             logi("Thread creation failed",strerror(err));
             return err;

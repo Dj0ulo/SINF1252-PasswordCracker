@@ -1,6 +1,8 @@
 #ifndef HASHS_H_INCLUDED
 #define HASHS_H_INCLUDED
 
+#include <stdint.h>
+
 #define HASH_SIZE 32
 
 void initBuffer();

@@ -2,10 +2,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <fcntl.h>
+#include <unistd.h>
 #include <sys/stat.h>
 
 #include "filesLocations.h"
-#include "main.h"
 #include "buffer.h"
 #include "files.h"
 
@@ -42,7 +42,7 @@ int parseFiles(FilesLocation *loc)
     return 0;
 }
 
-dev_t getDeviceID(const char* filename)
+int getDeviceID(const char* filename)
 {
     struct stat buf;
     if(stat(filename, &buf)==-1)
@@ -53,7 +53,7 @@ dev_t getDeviceID(const char* filename)
 int initLocations(const char **files, const int amount)
 {
     NLOCATIONS = 0;
-    dev_t devicesID[amount];
+    int devicesID[amount];
     for(int i=0;i<amount;i++)
     {
         devicesID[i] = getDeviceID(files[i]);
@@ -96,13 +96,16 @@ int initLocations(const char **files, const int amount)
                 locFiles[i].amount++;
         locFiles[i].paths = (const char**)malloc(locFiles[i].amount * sizeof(char*));
         if(locFiles[i].paths)
+	{
             for(int k=0,j=0;k<amount;k++)
                 if(locFiles[i].id==devicesID[k])
                 {
                     locFiles[i].paths[j]=files[k];
                     j++;
                 }
-        else{
+	}
+        else
+	{
             logi("Error malloc","initLocations : paths");
             return -1;
         }

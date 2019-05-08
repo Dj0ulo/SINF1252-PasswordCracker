@@ -4,7 +4,7 @@
 #include <pthread.h>
 #include <semaphore.h>
 
-#include "main.h"
+#include "files.h"
 #include "buffer.h"
 
 size_t BUFFER_SIZE;
@@ -18,7 +18,7 @@ void initBuffer(const size_t size)
     BUFFER_SIZE = size;
     buffer = (uint8_t **)malloc(BUFFER_SIZE * sizeof(uint8_t*));
     if(buffer)
-        for(int i=0;i<BUFFER_SIZE;i++)
+        for(size_t i=0;i<BUFFER_SIZE;i++)
             buffer[i] = NULL;
     else
         logi("Error malloc", "initBuffer");
@@ -32,14 +32,14 @@ void freeBuffer()
 {
     if(buffer==NULL)
         return;
-    for(int i=0;i<BUFFER_SIZE;i++)
+    for(size_t i=0;i<BUFFER_SIZE;i++)
         if(buffer[i])
             free(buffer[i]);
     free(buffer);
 }
 int isBufferEmpty()
 {
-    for(int i=0;i<BUFFER_SIZE;i++)
+    for(size_t i=0;i<BUFFER_SIZE;i++)
         if(buffer[i])
             return 0;
     return 1;
@@ -51,7 +51,7 @@ void insertInBuffer(uint8_t *hash)
     sem_wait(&empty); // attente d'un slot libre
     pthread_mutex_lock(&mutex);
     // section critique
-    for(int i=0;i<BUFFER_SIZE;i++)
+    for(size_t i=0;i<BUFFER_SIZE;i++)
         if(buffer[i] == NULL)
         {
             buffer[i] = (uint8_t *)malloc(HASH_SIZE);
@@ -72,7 +72,7 @@ uint8_t *removeFromBuffer()
     pthread_mutex_lock(&mutex);
     // section critique
     uint8_t *r = NULL;
-    for(int i=0;i<BUFFER_SIZE;i++)
+    for(size_t i=0;i<BUFFER_SIZE;i++)
         if(buffer[i])
         {
             r = (uint8_t *)malloc(HASH_SIZE);
