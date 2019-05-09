@@ -117,23 +117,33 @@ void resetList(const char *value, const unsigned int score)
         addToList(value, score);
     }
 }
-void addIfGood(const char *value, const int selection)
+/* return 0 si c'est le premier mdp, 1 si il est ajouté, 2 si il est meilleur que les autres, -1 si il n'est pas ajouté*/
+int addIfGood(const char *value, const int selection)
 {
+    int res = 0;
     pthread_mutex_lock(&mutexList);
     if(linkedList)
     {
         const unsigned int n = getScore(value, selection);
-        if(linkedList->first==NULL)
+        if(linkedList->first==NULL){
             addToList(value, n);
+        }
         else
         {
-            if(linkedList->score < n)
+            if(linkedList->score < n){
                 resetList(value, n);
-            else if(linkedList->score == n)
+                res = 2;
+            }
+            else if(linkedList->score == n){
                 addToList(value, n);
+                res = 1;
+            }
+            else
+                res = -1;
         }
     }
     pthread_mutex_unlock(&mutexList);
+    return res;
 }
 void printList()
 {
@@ -154,9 +164,12 @@ int writeList(const char *filename)
 {
     int f = 1;
     if(filename)
-        f = open(filename, O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR);
-    if(f==-1)
+        f = open(filename, O_WRONLY | O_CREAT | O_TRUNC, S_IWRITE);
+
+    if(f==-1){
+        logi("Writelist : Failed to open file",filename);
         return -1;
+    }
     if(!linkedList)
         return -2;
 

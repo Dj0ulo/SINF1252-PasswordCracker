@@ -10,7 +10,9 @@ void freeBuffer();
 int isBufferEmpty();
 
 void insertInBuffer(uint8_t *);
-uint8_t *removeFromBuffer();
+int removeFromBuffer(uint8_t *);
+
+void freeBufferSem();
 
 void printHash(const char *,const uint8_t *);
 

@@ -18,8 +18,10 @@ void initBuffer(const size_t size)
     BUFFER_SIZE = size;
     buffer = (uint8_t **)malloc(BUFFER_SIZE * sizeof(uint8_t*));
     if(buffer)
+    {
         for(size_t i=0;i<BUFFER_SIZE;i++)
             buffer[i] = NULL;
+    }
     else
         logi("Error malloc", "initBuffer");
 
@@ -50,6 +52,7 @@ void insertInBuffer(uint8_t *hash)
         return;
     sem_wait(&empty); // attente d'un slot libre
     pthread_mutex_lock(&mutex);
+
     // section critique
     for(size_t i=0;i<BUFFER_SIZE;i++)
         if(buffer[i] == NULL)
@@ -66,30 +69,32 @@ void insertInBuffer(uint8_t *hash)
     pthread_mutex_unlock(&mutex);
     sem_post(&full); // il y a un slot rempli en plus
 }
-uint8_t *removeFromBuffer()
+int removeFromBuffer(uint8_t *hash)
 {
+    int r = 0;
     sem_wait(&full); // attente d'un slot rempli
     pthread_mutex_lock(&mutex);
     // section critique
-    uint8_t *r = NULL;
     for(size_t i=0;i<BUFFER_SIZE;i++)
         if(buffer[i])
         {
-            r = (uint8_t *)malloc(HASH_SIZE);
-            if(!r){
-                logi("Error malloc", "removeFromBuffer");
-                break;
-            }
-            memcpy(r, buffer[i], HASH_SIZE);
+            memcpy(hash, buffer[i], HASH_SIZE);
             free(buffer[i]);
             buffer[i] = NULL;
+            r = 1;
             break;
         }
     pthread_mutex_unlock(&mutex);
     sem_post(&empty); // il y a un slot libre en plus
     return r;
 }
-
+void freeBufferSem()
+{
+    int maxFull = BUFFER_SIZE;
+    BUFFER_SIZE = 0;
+    for(int i=0;i<maxFull;i++)
+        sem_post(&full);
+}
 ///Pour débuguer------------------------------------------
 extern pthread_mutex_t mtxPrt;
 void printHash(const char *one,const uint8_t *buff)

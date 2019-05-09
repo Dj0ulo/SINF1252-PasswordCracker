@@ -28,11 +28,25 @@ int parseFiles(FilesLocation *loc)
         int f = open(filename, O_RDONLY);
         if(f>-1)
         {
-            for(int k=0;get32Bytes(hash, f, k*HASH_SIZE)>0;k++){
+            struct stat * buf = malloc(sizeof(struct stat));
+            if(!buf)
+                return -1;
+            if(stat(filename, buf)==-1)
+                return -1;
+            size_t size = buf->st_size;
+
+            size_t k=0;
+            for(;k<size/32;k++)
+            {
+                read(f,hash,HASH_SIZE);
                 insertInBuffer(hash);
+                lseek(f,k*HASH_SIZE,SEEK_SET);
             }
+
             if(close(f)==-1)
                 printf("Unable to close a file");
+            else
+                logi("File closed",loc->paths[i]);
         }
         else
             logi("Unable to open", loc->paths[i]);
@@ -96,16 +110,18 @@ int initLocations(const char **files, const int amount)
                 locFiles[i].amount++;
         locFiles[i].paths = (const char**)malloc(locFiles[i].amount * sizeof(char*));
         if(locFiles[i].paths)
-	{
+        {
             for(int k=0,j=0;k<amount;k++)
+            {
                 if(locFiles[i].id==devicesID[k])
                 {
                     locFiles[i].paths[j]=files[k];
                     j++;
                 }
-	}
+            }
+        }
         else
-	{
+        {
             logi("Error malloc","initLocations : paths");
             return -1;
         }

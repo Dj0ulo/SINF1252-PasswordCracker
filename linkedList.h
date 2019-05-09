@@ -19,7 +19,7 @@ typedef struct list{
 
 void initList();
 void freeList();
-void addIfGood(const char *, const int);
+int addIfGood(const char *, const int);
 void printList();
 int writeList(const char *);
 
