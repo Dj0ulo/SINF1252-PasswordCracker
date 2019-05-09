@@ -38,7 +38,8 @@ int parseFiles(FilesLocation *loc)
             size_t k=0;
             for(;k<size/32;k++)
             {
-                read(f,hash,HASH_SIZE);
+                if(read(f,hash,HASH_SIZE)==-1)
+                    break;
                 insertInBuffer(hash);
                 lseek(f,k*HASH_SIZE,SEEK_SET);
             }

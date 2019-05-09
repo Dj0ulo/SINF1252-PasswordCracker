@@ -128,13 +128,13 @@ int main(int argc, char *argv[])
     for(int i=optind;i<argc;i++)
         IN_FILES[i-optind] = argv[i];
 
-    N_IN_FILES = 1;
+    /*N_IN_FILES = 1;
     IN_FILES = malloc(N_IN_FILES * sizeof(char*));
     char *in = "test.bin";
     IN_FILES[0] = in;
     char *out = "out.txt";
     OUT_FILE = out;
-    NTHREADS = 100;
+    NTHREADS = 100;*/
 
     ///PRINT-------------------------------------
     printf("NTHREADS : %d\n",NTHREADS);

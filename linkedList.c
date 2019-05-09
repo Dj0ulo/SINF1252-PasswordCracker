@@ -164,7 +164,7 @@ int writeList(const char *filename)
 {
     int f = 1;
     if(filename)
-        f = open(filename, O_WRONLY | O_CREAT | O_TRUNC, S_IWRITE);
+        f = open(filename, O_WRONLY | O_CREAT | O_TRUNC, 0200);
 
     if(f==-1){
         logi("Writelist : Failed to open file",filename);
