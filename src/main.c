@@ -130,11 +130,11 @@ int main(int argc, char *argv[])
 
     /*N_IN_FILES = 1;
     IN_FILES = malloc(N_IN_FILES * sizeof(char*));
-    char *in = "test.bin";
+    char *in = "02_6c_5.bin";
     IN_FILES[0] = in;
     char *out = "out.txt";
     OUT_FILE = out;
-    NTHREADS = 100;*/
+    NTHREADS = 10;*/
 
     ///PRINT-------------------------------------
     printf("NTHREADS : %d\n",NTHREADS);

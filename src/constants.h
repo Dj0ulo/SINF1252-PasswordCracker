@@ -4,6 +4,6 @@
 #define VOWEL 0
 #define CONSONANT 1
 
-#define MAX_SIZE_PSWD 6
+#define MAX_SIZE_PSWD 16
 
 #endif // CONSTANTS_H_INCLUDED

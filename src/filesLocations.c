@@ -15,7 +15,7 @@ int NLOCATIONS = 1;
 
 int parseFiles(FilesLocation *loc)
 {
-    uint8_t *hash = (uint8_t *)malloc(HASH_SIZE);
+    uint8_t *hash = (uint8_t*)malloc(HASH_SIZE);
     if(!hash){
         logi("Error malloc","parseFiles");
         return -1;
@@ -38,10 +38,11 @@ int parseFiles(FilesLocation *loc)
             size_t k=0;
             for(;k<size/32;k++)
             {
-                if(read(f,hash,HASH_SIZE)==-1)
+                int r = read(f,hash,HASH_SIZE);
+                if(r==-1)
                     break;
                 insertInBuffer(hash);
-                lseek(f,k*HASH_SIZE,SEEK_SET);
+                lseek(f,0,SEEK_CUR);
             }
 
             if(close(f)==-1)
