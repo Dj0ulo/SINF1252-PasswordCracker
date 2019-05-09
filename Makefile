@@ -35,4 +35,4 @@ sha256.o: src/hash/sha256.c
 	$(CC) $(CFLAGS) -c src/hash/sha256.c
 
 clean:
-	@rm cracker *.o
+	rm -rf *.o cracker
