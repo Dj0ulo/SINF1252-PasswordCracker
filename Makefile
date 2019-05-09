@@ -14,8 +14,8 @@ CFLAGS += -pthread
 
 all : cracker
 
-cracker: main.o linkedList.o filesLocations.o files.o buffer.o reverse.o sha256.o
-	$(CC) $(CFLAGS) -o cracker main.o linkedList.o filesLocations.o files.o buffer.o reverse.o sha256.o
+cracker: main.o linkedList.o filesLocations.o files.o buffer.o bufferRes.o reverse.o sha256.o
+	$(CC) $(CFLAGS) -o cracker main.o linkedList.o filesLocations.o files.o buffer.o bufferRes.o reverse.o sha256.o
 
 main.o: src/main.c
 	$(CC) $(CFLAGS) -c src/main.c
@@ -27,6 +27,8 @@ files.o: src/files.c
 	$(CC) $(CFLAGS) -c src/files.c
 buffer.o: src/buffer.c
 	$(CC) $(CFLAGS) -c src/buffer.c
+bufferRes.o: src/bufferRes.c
+	$(CC) $(CFLAGS) -c src/bufferRes.c
 reverse.o: src/hash/reverse.c
 	$(CC) $(CFLAGS) -c src/hash/reverse.c
 sha256.o: src/hash/sha256.c
