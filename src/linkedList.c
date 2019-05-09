@@ -19,7 +19,7 @@ node_t *initNode(const char *value)
     node_t* n = (node_t*)malloc(sizeof(node_t));
     if(n)
     {
-        n->value = (char *)malloc(strlen(value)+1);
+        n->value = (char *)malloc(strlen(value) + 1);
         if(!n->value)
         {
             logi("Error malloc","initNode");
@@ -86,7 +86,7 @@ void eraseList()
 }
 void freeList()
 {
-    if(linkedList)
+    if(!linkedList)
         return;
     eraseList();
     free(linkedList);
@@ -173,8 +173,6 @@ int writeList(const char *filename)
     if(!linkedList)
         return -2;
 
-//    printf("%d\n",linkedList->size);
-
     node_t* cur = linkedList->first;
     while(cur){
         if(write(f,cur->value,strlen(cur->value))==-1)
@@ -183,7 +181,9 @@ int writeList(const char *filename)
             return -3;
         cur = cur->next;
     }
-    if(close(f)==-1)
+    if(f>1 && close(f)==-1){
         return -4;
+	}
+	
     return 0;
 }

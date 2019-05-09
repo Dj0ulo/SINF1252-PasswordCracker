@@ -12,6 +12,7 @@ typedef struct{
 }FilesLocation;
 
 int initLocations(const char **, const int);
+void thrdLocationsJoin();
 void printLocations();
 void freeLocations();
 int isAllLocationsDone();

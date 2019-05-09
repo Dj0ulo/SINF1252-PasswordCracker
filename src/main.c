@@ -55,7 +55,7 @@ void crackHashes()
                 logi("ReverseHash didn't find a password that matches the hash...",res);
         }
     }
-    //logi("CRACK HASH","FINISH");
+    logi("CRACK HASH","FINISH");
     free(hash);
 }
 void sortPswd()
@@ -85,7 +85,7 @@ void sortPswd()
 
         }
     }
-    //logi("SORT PASSWORD","FINISH");
+    logi("SORT PASSWORD","FINISH");
     free(pswd);
 }
 
@@ -173,10 +173,17 @@ int main(int argc, char *argv[])
         return err;
     }
 
+	//WAIT threads
+	thrdLocationsJoin();
+	if(isBufferEmpty())
+		freeBufferSem();
+
     for(int i=0;i<NTHREADS;i++)
         pthread_join(thrdCalcul[i],NULL);
     thrdsHashDone = true;
-    freeBufferResSem();
+
+	if(isBufferResEmpty())
+    	freeBufferResSem();
 
     pthread_join(thrdSort,NULL);
 

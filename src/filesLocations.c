@@ -34,6 +34,7 @@ int parseFiles(FilesLocation *loc)
             if(stat(filename, buf)==-1)
                 return -1;
             size_t size = buf->st_size;
+			free(buf);
 
             size_t k=0;
             for(;k<size/32;k++)
@@ -41,6 +42,7 @@ int parseFiles(FilesLocation *loc)
                 int r = read(f,hash,HASH_SIZE);
                 if(r==-1)
                     break;
+		//printHash("h",hash);
                 insertInBuffer(hash);
                 lseek(f,0,SEEK_CUR);
             }
@@ -140,6 +142,11 @@ int initLocations(const char **files, const int amount)
     }
     return 0;
 }
+void thrdLocationsJoin()
+{
+	for(int i=0;i<NLOCATIONS;i++)
+        pthread_join(locFiles[i].thrd,NULL);
+}
 void printLocations()
 {
     for(int i=0;i<NLOCATIONS;i++)
@@ -152,8 +159,13 @@ void printLocations()
 }
 void freeLocations()
 {
-    if(!locFiles)
+    if(!locFiles){
         return;
+	}
+	for(int i=0;i<NLOCATIONS;i++)
+	{
+		free(locFiles[i].paths);
+	}
     free(locFiles);
 }
 int isAllLocationsDone()
