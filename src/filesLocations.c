@@ -7,7 +7,7 @@
 
 #include "filesLocations.h"
 #include "buffer.h"
-#include "files.h"
+#include "log.h"
 
 
 FilesLocation *locFiles;
@@ -43,6 +43,7 @@ int parseFiles(FilesLocation *loc)
                 if(r==-1)
                     break;
 		//printHash("h",hash);
+		loc->nbHashs++;
                 insertInBuffer(hash);
                 lseek(f,0,SEEK_CUR);
             }
@@ -91,6 +92,7 @@ int initLocations(const char **files, const int amount)
     for(int i=0;i<NLOCATIONS;i++){
         locFiles[i].id = -2;
         locFiles[i].done = 0;
+		locFiles[i].nbHashs = 0;
     }
 
     for(int i=0;i<amount;i++)
@@ -130,7 +132,7 @@ int initLocations(const char **files, const int amount)
             return -1;
         }
     }
-    printLocations();
+    //printLocations();
     for(int i=0;i<NLOCATIONS;i++)
     {
         int err = pthread_create(&locFiles[i].thrd, NULL, (void*)&parseFiles, (void*)&locFiles[i]);
@@ -174,4 +176,11 @@ int isAllLocationsDone()
         if(!locFiles[i].done)
             return 0;
     return 1;
+}
+int nTotHashs()
+{
+	int n=0;
+	for(int i=0;i<NLOCATIONS;i++)
+        n+=locFiles[i].nbHashs;
+    return n;
 }

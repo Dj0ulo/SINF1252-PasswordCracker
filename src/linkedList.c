@@ -6,7 +6,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-#include "files.h"
+#include "log.h"
 #include "linkedList.h"
 #include "constants.h"
 
@@ -145,6 +145,25 @@ int addIfGood(const char *value, const int selection)
     pthread_mutex_unlock(&mutexList);
     return res;
 }
+size_t calculateSizeList()
+{
+	if(linkedList)
+    {
+        node_t* cur = linkedList->first;
+		size_t n=0;
+        while(cur)
+        {
+			n++;
+            cur = cur->next;
+        }
+		return n;
+    }
+	return 0;
+}
+size_t sizeList()
+{
+	return linkedList->size;
+}
 void printList()
 {
     pthread_mutex_lock(&mutexList);
@@ -164,7 +183,7 @@ int writeList(const char *filename)
 {
     int f = 1;
     if(filename)
-        f = open(filename, O_WRONLY | O_CREAT | O_TRUNC, 0200);
+        f = open(filename, O_WRONLY | O_CREAT | O_TRUNC, S_IRWXU);
 
     if(f==-1){
         logi("Writelist : Failed to open file",filename);
@@ -184,6 +203,6 @@ int writeList(const char *filename)
     if(f>1 && close(f)==-1){
         return -4;
 	}
-	
+
     return 0;
 }

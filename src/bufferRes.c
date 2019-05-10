@@ -5,7 +5,7 @@
 #include <semaphore.h>
 
 #include "constants.h"
-#include "files.h"
+#include "log.h"
 #include "bufferRes.h"
 
 size_t BUFFER_RES_SIZE;

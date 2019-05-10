@@ -5,20 +5,21 @@
 #include <pthread.h>
 #include <fcntl.h>
 #include <getopt.h>
+#include <time.h>
 
 #include "hash/reverse.h"
 
 #include "linkedList.h"
 #include "buffer.h"
 #include "bufferRes.h"
-#include "files.h"
+#include "log.h"
 #include "filesLocations.h"
 #include "constants.h"
 
-//https://www.gnu.org/software/libc/manual/html_node/Example-of-Getopt.html#Example-of-Getopt
 
 extern pthread_mutex_t mtxPrt;
 int SELECTION = VOWEL;
+int PRINT_HASH = 0;
 
 bool thrdsHashDone = false;
 void crackHashes()
@@ -32,9 +33,6 @@ void crackHashes()
     char res[MAX_SIZE_PSWD + 1];
     while(1)
     {
-        /*logd("isAllLocationsDone",isAllLocationsDone());
-        logd("isBufferEmpty",isBufferEmpty());*/
-
         if(isAllLocationsDone() && isBufferEmpty())//si plus de hash a cracker
         {
             freeBufferSem();
@@ -49,13 +47,14 @@ void crackHashes()
 
             if(succes){
                 insertInBufferRes(res);
-                //logi("ReverseHash has found",res);
+				if(PRINT_HASH)
+                	logi("ReverseHash has found",res);
             }
             else
                 logi("ReverseHash didn't find a password that matches the hash...",res);
         }
     }
-    logi("CRACK HASH","FINISH");
+    //logi("CRACK HASH","FINISH");
     free(hash);
 }
 void sortPswd()
@@ -72,36 +71,29 @@ void sortPswd()
         //logi("SORT PASSWORD","Wait");
         if(removeFromBufferRes(pswd))
         {
-            logi("Sorting",pswd);
+            //logi("Sorting",pswd);
             addIfGood(pswd, SELECTION);
-            /*if(r==0)
-                logfi("  first",pswd);
-            else if(r==1)
-                logfi("  added",pswd);
-            else if(r==2)
-                logfi("  best",pswd);
-            else
-                logfi("  wrong",pswd);*/
-
         }
     }
-    logi("SORT PASSWORD","FINISH");
+    //logi("SORT PASSWORD","FINISH");
     free(pswd);
 }
 
 int main(int argc, char *argv[])
 {
+	clock_t  start = clock();
     pthread_mutex_init(&mtxPrt, NULL);
-    //initLogf();
-    printf("Hello world!\n");
+
+    printf("--- Cracker ---\n");
 
     int NTHREADS = 1;
     const char *OUT_FILE = NULL;
     const char **IN_FILES = NULL;
     int N_IN_FILES = 1;
 
+    //Source : https://www.gnu.org/software/libc/manual/html_node/Example-of-Getopt.html#Example-of-Getopt
     char c;
-    while ((c = getopt (argc, argv, "ct:o:")) != -1)
+    while ((c = getopt (argc, argv, "ict:o:")) != -1){
         switch (c)
         {
         case 't':
@@ -115,9 +107,13 @@ int main(int argc, char *argv[])
         case 'o':
             OUT_FILE = optarg;
             break;
+		case 'i':
+            PRINT_HASH = 1;
+            break;
         case '?':
             return 1;
         }
+    }
     N_IN_FILES = argc-optind;
     IN_FILES = (const char **)malloc(N_IN_FILES * sizeof(char*));
     if(!IN_FILES)
@@ -187,9 +183,9 @@ int main(int argc, char *argv[])
 
     pthread_join(thrdSort,NULL);
 
-    err = writeList(OUT_FILE);
-    if(err)
-        return err;
+    writeList(OUT_FILE);
+
+	logd("Number of password",sizeList());
 
     freeList();
     freeLocations();
@@ -198,7 +194,7 @@ int main(int argc, char *argv[])
 
     free(IN_FILES);
 
-    logi("Finish","Everything went fine");
+    logd("Finish in (ms)",1000*(clock()-start)/CLOCKS_PER_SEC);
 
     return 0;
 }

@@ -4,7 +4,7 @@
 #include <pthread.h>
 #include <semaphore.h>
 
-#include "files.h"
+#include "log.h"
 #include "buffer.h"
 
 size_t BUFFER_SIZE;
