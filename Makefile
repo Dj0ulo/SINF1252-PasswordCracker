@@ -35,7 +35,9 @@ all : cracker tests
 clean:
 	rm -rf *.o cracker
 
-tests: tests/test
+tests: doTest
+doTest:
+	chmod 777 tests/test
 	./tests/test
 	echo "\n\nTest d'un fichier de 1 hash avec 1 thread\n"
 	./cracker tests/test-input/1.bin
