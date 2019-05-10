@@ -8,6 +8,3 @@ log.o: ../src/log.c
 	gcc -c ../src/log.c
 bufferRes.o: ../src/bufferRes.c
 	gcc -pthread -c ../src/bufferRes.c
-	
-clean:
-	rm -rf *.o test

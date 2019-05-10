@@ -1,5 +1,5 @@
-# CC variable for used C compiler
-# You can replace gcc by clang if you prefer
+# CC variable for used C compiler You can replace gcc by clang if you 
+# prefer
 CC = gcc
 # CFLAGS variable for gcc/clang flags
 # See gcc/clang manual to understand all flags
@@ -12,11 +12,8 @@ CFLAGS += -O2 -D_FORTIFY_SOURCE=2 # Add canary code, i.e. detect buffer overflow
 CFLAGS += -fstack-protector-all # Add canary code to detect stack smashing
 CFLAGS += -pthread
 
-all : cracker tests	
-
 cracker: main.o linkedList.o filesLocations.o log.o buffer.o bufferRes.o reverse.o sha256.o
 	$(CC) $(CFLAGS) -o cracker main.o linkedList.o filesLocations.o log.o buffer.o bufferRes.o reverse.o sha256.o
-
 main.o: src/main.c
 	$(CC) $(CFLAGS) -c src/main.c
 linkedList.o: src/linkedList.c
@@ -34,8 +31,10 @@ reverse.o: src/hash/reverse.c
 sha256.o: src/hash/sha256.c
 	$(CC) $(CFLAGS) -c src/hash/sha256.c
 
+all : cracker tests
 clean:
 	rm -rf *.o cracker
+
 tests: tests/test
 	./tests/test
 	echo "\n\nTest d'un fichier de 1 hash avec 1 thread\n"
